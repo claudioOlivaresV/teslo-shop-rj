@@ -7,7 +7,7 @@ const AdminLayout = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
-    <div className=" bg-gray-50 flex">
+    <div className=" bg-gray-50 flex min-h-screen ">
       <AdminSidebar
         isCollapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}

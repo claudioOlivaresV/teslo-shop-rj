@@ -37,6 +37,8 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
     { icon: HelpCircle, label: "Help", to: "/admin/help" },
   ];
   const isActive = (path: string) => {
+    if (pathname.includes("/admin/products") && path === "/admin/products")
+      return true;
     return pathname === path;
   };
   return (
