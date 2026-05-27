@@ -1,14 +1,17 @@
 import { CustomPaginator } from "@/components/custom/CustomPaginator";
 import { CustomJumbotron } from "../components/CustomJumbotron";
 import { ProductsGrid } from "../components/ProductsGrid";
-import { products } from "@/mocks/products.mock";
+import { useProducts } from "../hooks/useProducts";
 
 export const HomePage = () => {
+  const { data, isLoading } = useProducts();
+  console.log(data);
+
   return (
     <>
       <CustomJumbotron title="Bienvenido a Teslo Shop" />
-      <ProductsGrid products={products} />
-      <CustomPaginator totalPages={5} />
+      <ProductsGrid products={data?.products ?? []} />
+      <CustomPaginator totalPages={data?.pages ?? 0} />
     </>
   );
 };

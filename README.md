@@ -1,75 +1,105 @@
-# React + TypeScript + Vite
+# Teslo Shop (RJ)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Pequeña tienda/administrador construida con Vite + React y TailwindCSS (shadcn UI). Esta documentación resume la estructura, decisiones y los arreglos que se han aplicado o que conviene aplicar.
 
-Currently, two official plugins are available:
+## Tecnologías
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Vite (React)
+- React + TypeScript
+- TailwindCSS (configurable con dark mode por clase)
+- shadcn UI
+- lucide-react (iconos)
+- @fontsource-variable/geist
+- Plugins: @tailwindcss/vite, @rolldown/plugin-babel
 
-## React Compiler
+## Estructura principal (relevante)
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+- src/
+  - admin/
+    - components/ (AdminHeader, AdminSidebar, AdminTitle, ...)
+    - layouts/ (AdminLayout.tsx)
+    - pages/ (AdminProductsPage.tsx, ...)
+  - shop/
+    - pages/ (HomePage.tsx)
+    - components/
+  - index.css
 
-Note: This will impact Vite dev & build performances.
+## Arranque del proyecto
 
-## Expanding the ESLint configuration
+1. Instalar dependencias:
+   - npm install
+2. Levantar servidor dev:
+   - npm run dev
+3. Construir:
+   - npm run build
+4. Servir la build:
+   - npm run preview (o tu servidor preferido)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Notas importantes / recomendaciones aplicadas
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- Tailwind en `src/index.css`: reemplazar `@import "tailwindcss";` por las directivas oficiales para que se generen las capas:
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+  ```css
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+  ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+  (mantén luego tus @import de shadcn, fuentes y otros).
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- Activar dark mode por clase en `tailwind.config.*`:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+  ```js
+  // tailwind.config.js
+  module.exports = {
+    darkMode: "class",
+    content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+    theme: { extend: {} },
+    plugins: [],
+  };
+  ```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- Para forzar siempre modo oscuro (rápido): añadir `class="dark"` al elemento `<html>` en `index.html` o desde JS:
+
+  ```ts
+  document.documentElement.classList.add("dark");
+  ```
+
+  Tu `index.css` ya define variables en `:root` y `.dark` y usa `body { @apply bg-background text-foreground; }`, por lo que al añadir la clase `.dark` se aplicará el fondo oscuro y texto claro.
+
+- Vite ya está configurado para Tailwind (plugin `tailwindcss()` en `vite.config.ts`).
+
+## Problemas detectados y cómo se resolvieron
+
+- AdminHeader: se usó `h-18` (no incluida por defecto en Tailwind). Solución: usar una utilidad válida (ej. `h-16`, `h-20` o `h-[72px]`) o expandir spacing en `tailwind.config`.
+- AdminLayout: para que el contenido principal ocupe toda la altura y permita scroll interno es necesario:
+  - contenedor raíz: `min-h-screen`
+  - contenedor del contenido: `flex-1 flex flex-col min-h-0`
+  - main: `flex-1 min-h-0 overflow-auto`
+    Ejemplo ya aplicado en el layout: el main debe ser scrollable y ocupar el espacio restante.
+- Error de import/export (AdminHeader): el componente exporta named export (`export const AdminHeader`) pero en algún import se esperaba default. Usar import nombrado:
+  ```ts
+  import { AdminHeader } from "@/admin/components/AdminHeader";
+  ```
+  o exportar también por defecto:
+  ```ts
+  export default AdminHeader;
+  ```
+- Alturas y scroll de tablas: envolver tablas en `div.overflow-x-auto` y usar `min-h-0` en contenedores flex para que funcionen correctamente los scrolls verticales/horizontales.
+- Si persisten problemas de altura, añadir en `index.css`:
+  ```css
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  ```
+
+## Buenas prácticas y siguientes pasos
+
+- Mantener `darkMode: 'class'` y una lógica de toggling que guarde preferencia en localStorage y respete `prefers-color-scheme`.
+- Revisar todas las clases personalizadas (como `h-18`) y usar utilidades válidas o extender el theme.
+- Añadir pruebas unitarias para componentes críticos (paginador, grid, formularios).
+- Centralizar layout/admin state (sidebar collapse) si se comparte entre páginas.
+
+---

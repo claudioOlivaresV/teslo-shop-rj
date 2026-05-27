@@ -4,8 +4,10 @@ import React from "react";
 import { CustomJumbotron } from "../components/CustomJumbotron";
 import { ProductsGrid } from "../components/ProductsGrid";
 import { useParams } from "react-router";
+import { useProducts } from "../hooks/useProducts";
 
 export const GenderPages = () => {
+  const { data } = useProducts();
   const { gender } = useParams();
 
   const genderLabel =
@@ -13,8 +15,8 @@ export const GenderPages = () => {
   return (
     <>
       <CustomJumbotron title={`Productos para ${genderLabel}`} />
-      <ProductsGrid products={products} />
-      <CustomPaginator totalPages={5} />
+      <ProductsGrid products={data?.products ?? []} />
+      <CustomPaginator totalPages={data?.pages ?? 0} />
     </>
   );
 };
