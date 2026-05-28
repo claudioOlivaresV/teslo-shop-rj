@@ -1,6 +1,4 @@
 import { CustomPaginator } from "@/components/custom/CustomPaginator";
-import { products } from "@/mocks/products.mock";
-import React from "react";
 import { CustomJumbotron } from "../components/CustomJumbotron";
 import { ProductsGrid } from "../components/ProductsGrid";
 import { useParams } from "react-router";
@@ -16,7 +14,7 @@ export const GenderPages = () => {
     <>
       <CustomJumbotron title={`Productos para ${genderLabel}`} />
       <ProductsGrid products={data?.products ?? []} />
-      <CustomPaginator totalPages={data?.pages ?? 0} />
+      <CustomPaginator totalPages={data?.pages ?? 1} />
     </>
   );
 };
