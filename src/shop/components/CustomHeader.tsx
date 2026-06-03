@@ -5,8 +5,10 @@ import { useRef, type KeyboardEvent } from "react";
 import { Link, useParams, useSearchParams } from "react-router";
 import { cn } from "@/lib/utils";
 import { CustomLogo } from "@/components/custom/CustomLogo";
+import { useAuthStore } from "@/auth/store/auth.store";
 
 export const CustomHeader = () => {
+  const { authStatus, logout, isAdmin } = useAuthStore();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -91,16 +93,29 @@ export const CustomHeader = () => {
             <Button variant="ghost" size="icon" className="md:hidden">
               <Search className="h-5 w-5" />
             </Button>
-            <Link to="/auth/login">
-              <Button variant="default" size="sm" className="ml-2">
-                Login
+            {authStatus === "not-authenticated" ? (
+              <Link to="/auth/login">
+                <Button variant="default" size="sm" className="ml-2">
+                  Login
+                </Button>
+              </Link>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-2"
+                onClick={logout}
+              >
+                Logout
               </Button>
-            </Link>
-            <Link to="/admin">
-              <Button variant="destructive" size="sm" className="ml-2">
-                Login
-              </Button>
-            </Link>
+            )}
+            {isAdmin() && authStatus === "authenticated" && (
+              <Link to="/admin">
+                <Button variant="destructive" size="sm" className="ml-2">
+                  Admin
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </div>
