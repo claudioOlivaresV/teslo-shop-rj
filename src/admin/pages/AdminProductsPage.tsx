@@ -11,7 +11,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router";
 import { CustomPaginator } from "@/components/custom/CustomPaginator";
+import { useProducts } from "@/shop/hooks/useProducts";
 export const AdminProductsPage = () => {
+  const { data, isLoading } = useProducts();
+
+  if (isLoading) return <div>Loading...</div>;
+
   return (
     <>
       <div className="flex justify-between items-center mb-4">
@@ -24,9 +29,29 @@ export const AdminProductsPage = () => {
         </Link>
       </div>
       <Table className="bg-white p-10 shadow-xs border-gray-200 mb-5">
+        <TableBody>
+          {data!.products.map((product) => (
+            <TableRow key={product.id}>
+              <TableCell>
+                <img
+                  className="w-20 h-20 object-cover rounded-md"
+                  src={product.images[0]}
+                  alt={product.title}
+                />
+              </TableCell>
+              <TableCell>{product.title}</TableCell>
+              <TableCell>${product.price.toFixed(2)}</TableCell>
+              <TableCell>{product.gender}</TableCell>
+              <TableCell>{product.stock}</TableCell>
+              <TableCell>{product.sizes.join(", ")}</TableCell>
+              <TableCell className="text-right">
+                <Link to={`/admin/products/${product.id}`}>Edit</Link>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[100px]">ID</TableHead>
             <TableHead>Imagen</TableHead>
             <TableHead>Nombre</TableHead>
             <TableHead>Precio</TableHead>
@@ -36,24 +61,8 @@ export const AdminProductsPage = () => {
             <TableHead className="text-right">Acciones</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
-          <TableRow>
-            <TableCell className="font-medium">1</TableCell>
-            <TableCell>
-              <img src="/path/to/image.jpg" alt="Product Image" />
-            </TableCell>
-            <TableCell>Product Name</TableCell>
-            <TableCell>$250.00</TableCell>
-            <TableCell>Category</TableCell>
-            <TableCell>In Stock</TableCell>
-            <TableCell>Small, Medium, Large</TableCell>
-            <TableCell className="text-right">
-              <Link to={`/admin/products/teslo`}>Edit</Link>
-            </TableCell>
-          </TableRow>
-        </TableBody>
       </Table>
-      <CustomPaginator totalPages={10} />
+      <CustomPaginator totalPages={data?.pages || 1} />
     </>
   );
 };
